@@ -3,5 +3,5 @@
   "editor.codeActionsOnSave": { "source.fixAll": true },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "cSpell.words": ["reakit"]
+  "cSpell.words": ["Meili", "meilisearch", "reakit"]
 }
