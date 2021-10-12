@@ -74,6 +74,7 @@ export class ImportController {
             : text
           const messageIndex: MessageIndex = {
             id: `${chatId}__${id}`,
+            messageId: id,
             chatId,
             fromId: from_id,
             fromName: from,

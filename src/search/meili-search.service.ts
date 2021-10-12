@@ -6,6 +6,7 @@ import deepEqual = require('deep-equal')
 
 export type MessageIndex = {
   id: string
+  messageId: number
   chatId: string
   fromId: string
   fromName: string
@@ -77,5 +78,9 @@ export class MeiliSearchService {
       ],
     })
     return result
+  }
+
+  getMessagesIndex() {
+    return this.messagesIndex
   }
 }
