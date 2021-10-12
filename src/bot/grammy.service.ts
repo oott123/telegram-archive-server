@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { Bot, Context } from 'grammy'
 import botConfig from '../config/bot.config'
-import SocksAgent = require('socks5-https-client/lib/Agent')
 import { MeiliSearchService } from 'src/search/meili-search.service'
 import httpConfig from 'src/config/http.config'
 import { Update } from '@grammyjs/types'
+import createHttpsProxyAgent = require('https-proxy-agent')
 
 @Injectable()
 export class GrammyService {
@@ -49,8 +49,8 @@ export class GrammyService {
   }
 
   async start() {
-    await this.bot.init()
     if (this.useWebhook) {
+      await this.bot.init()
       return this.setWebhookUrl()
     } else {
       await this.startPolling()
@@ -89,8 +89,8 @@ export class GrammyService {
     await this.bot.api.setWebhook(url)
   }
 
-  private startPolling() {
-    return this.bot.start()
+  private async startPolling() {
+    void this.bot.start()
   }
 
   public handleUpdate(update: Update) {
@@ -107,16 +107,10 @@ function joinNames(firstName: string, lastName: string | undefined) {
 }
 
 function getProxyAgent() {
-  if (!process.env.https_proxy) {
+  const proxy = process.env.https_proxy || process.env.http_proxy
+  if (!proxy) {
     return
   }
-  const url = new URL(process.env.https_proxy)
-  const socksAgent = new SocksAgent({
-    socksHost: url.hostname,
-    socksPort: url.port,
-    socksUsername: url.username,
-    socksPassword: url.password,
-  })
 
-  return socksAgent
+  return createHttpsProxyAgent(proxy)
 }
