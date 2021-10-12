@@ -8,7 +8,7 @@ import { MeiliSearchService } from './search/meili-search.service'
 import Debug from 'debug'
 import httpConfig from './config/http.config'
 import { ConfigType } from '@nestjs/config'
-import { GrammyService } from './bot/grammy.service'
+import { BotService } from './bot/bot.service'
 
 const debug = Debug('app:main')
 
@@ -40,7 +40,7 @@ async function bootstrap() {
   app.setGlobalPrefix(httpCfg.globalPrefix)
 
   debug('creating bot')
-  const bot = app.get(GrammyService)
+  const bot = app.get(BotService)
   await bot.start()
 
   debug('migrating search')

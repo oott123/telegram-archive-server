@@ -6,22 +6,22 @@ import {
   Param,
   Post,
 } from '@nestjs/common'
-import { GrammyService } from './grammy.service'
+import { BotService } from './bot.service'
 
 @Controller('bot/webhook')
 export class WebhookController {
-  constructor(private grammyService: GrammyService) {}
+  constructor(private botService: BotService) {}
 
   @Post(':updateToken/update')
   public async update(
     @Param('updateToken') updateToken: string,
     @Body() update: Update,
   ) {
-    if (!this.grammyService.checkUpdateToken(updateToken)) {
+    if (!this.botService.checkUpdateToken(updateToken)) {
       throw new ForbiddenException('invalid token')
     }
 
-    void this.grammyService.handleUpdate(update)
+    void this.botService.handleUpdate(update)
 
     return true
   }

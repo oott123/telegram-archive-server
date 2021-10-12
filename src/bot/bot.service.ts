@@ -8,7 +8,7 @@ import { Update } from '@grammyjs/types'
 import createHttpsProxyAgent = require('https-proxy-agent')
 
 @Injectable()
-export class GrammyService {
+export class BotService {
   private bot: Bot
   private useWebhook: boolean
   private baseUrl: string
