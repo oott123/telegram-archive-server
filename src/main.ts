@@ -24,7 +24,13 @@ async function bootstrap() {
     new FastifyAdapter({
       bodyLimit: 100 * 1024 * 1024,
     }),
-    { cors: true },
+    {
+      cors: {
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        origin: '*',
+        maxAge: 86400,
+      },
+    },
   )
   app.setGlobalPrefix('/api/v1')
 
