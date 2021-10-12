@@ -39,6 +39,12 @@ export class MeiliSearchService {
       searchableAttributes: ['text'],
       filterableAttributes: ['chatId', 'fromId'],
       sortableAttributes: ['timestamp'],
+      synonyms: {
+        妈: ['🐴', '马'],
+        草: ['🌿', '艹', '操', '肏'],
+        CF: ['CloudFlare', 'Cloud Flare'],
+        CloudFlare: ['CF'],
+      },
     }
     const rankingRules = [
       'words',
