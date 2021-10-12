@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common'
 import { GrammyService } from './grammy.service'
 
-@Controller('webhook')
+@Controller('bot/webhook')
 export class WebhookController {
   constructor(private grammyService: GrammyService) {}
 

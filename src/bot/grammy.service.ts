@@ -85,7 +85,7 @@ export class GrammyService {
   }
 
   private async setWebhookUrl() {
-    const url = `${this.baseUrl}/webhook/${this.updateToken}/update`
+    const url = `${this.baseUrl}/bot/webhook/${this.updateToken}/update`
     await this.bot.api.setWebhook(url)
   }
 
