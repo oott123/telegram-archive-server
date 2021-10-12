@@ -78,7 +78,7 @@ export class BotService {
       return null
     }
 
-    const { file_id: fileId } = getBiggestPhoto(photos[0])
+    const { file_id: fileId } = getSmallestPhoto(photos[0])
     const { file_path: filePath } = await this.bot.api.getFile(fileId)
     const fileUrl = `https://api.telegram.org/file/bot${this.bot.token}/${filePath}`
 
@@ -159,7 +159,7 @@ function getProxyAgent() {
   return createHttpsProxyAgent(proxy)
 }
 
-function getBiggestPhoto(photos: PhotoSize[]): PhotoSize {
-  const sorted = photos.sort((a, b) => b.width - a.width)
+function getSmallestPhoto(photos: PhotoSize[]): PhotoSize {
+  const sorted = photos.sort((a, b) => a.width - b.width)
   return sorted[0]
 }

@@ -1,12 +1,12 @@
 import {
   Controller,
   Get,
-  NotFoundException,
   Param,
-  StreamableFile,
-  Response,
+  CacheTTL,
+  UseInterceptors,
+  CacheInterceptor,
+  Header,
 } from '@nestjs/common'
-import { FastifyReply } from 'fastify'
 import { BotService } from 'src/bot/bot.service'
 
 @Controller('profile')
@@ -14,20 +14,18 @@ export class ProfileController {
   constructor(private botService: BotService) {}
 
   @Get('/:userId/photo')
-  async getProfilePhoto(
-    @Param('userId') userId: string,
-    @Response({ passthrough: true }) res: FastifyReply,
-  ) {
+  @CacheTTL(3600)
+  @UseInterceptors(CacheInterceptor)
+  @Header('Cache-Control', 'public, max-age=86400')
+  @Header('Content-Type', 'image/jpeg')
+  async getProfilePhoto(@Param('userId') userId: string) {
     userId = userId.replace(/^user/, '')
-    res.header('Cache-Control', 'public, max-age=86400')
 
     const photo = await this.botService.getProfilePhoto(Number(userId))
     if (!photo) {
-      throw new NotFoundException('photo not found')
+      return Buffer.from([])
     }
 
-    res.header('Content-Type', 'image/jpeg')
-
-    return new StreamableFile(photo.body as any)
+    return await photo.buffer()
   }
 }
