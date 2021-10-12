@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { MeiliSearchService } from './meili-search/meili-search.service';
+import { MeiliSearchService } from './meili-search.service'
 
 @Module({
-  providers: [MeiliSearchService]
+  providers: [MeiliSearchService],
 })
 export class SearchModule {}
