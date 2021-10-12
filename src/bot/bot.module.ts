@@ -6,6 +6,7 @@ import { WebhookController } from './webhook.controller'
 @Module({
   imports: [SearchModule],
   providers: [BotService],
+  exports: [BotService],
   controllers: [WebhookController],
 })
 export class BotModule {}

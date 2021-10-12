@@ -4,7 +4,8 @@ import { Bot, Context } from 'grammy'
 import botConfig from '../config/bot.config'
 import { MeiliSearchService } from 'src/search/meili-search.service'
 import httpConfig from 'src/config/http.config'
-import { Update } from '@grammyjs/types'
+import { PhotoSize, Update } from '@grammyjs/types'
+import fetch from 'node-fetch'
 import createHttpsProxyAgent = require('https-proxy-agent')
 
 @Injectable()
@@ -13,6 +14,7 @@ export class BotService {
   private useWebhook: boolean
   private baseUrl: string
   private updateToken: string
+  private agent: any
 
   constructor(
     @Inject(botConfig.KEY)
@@ -31,11 +33,11 @@ export class BotService {
       )
     }
 
-    const agent = getProxyAgent()
+    this.agent = getProxyAgent()
     this.bot = new Bot(botCfg.token, {
       client: {
         baseFetchConfig: {
-          agent,
+          agent: this.agent,
           compress: true,
         },
       },
@@ -55,6 +57,34 @@ export class BotService {
     } else {
       await this.startPolling()
     }
+  }
+
+  public async checkIfUserIsMember(userId: number, chatId: string) {
+    const id = this.chatId2ApiId(chatId)
+    const { status } = await this.bot.api.getChatMember(id, userId)
+
+    return (
+      status === 'member' || status === 'creator' || status === 'administrator'
+    )
+  }
+
+  public chatId2ApiId(chatId: string) {
+    return Number(chatId.replace(/^supergroup/, '-100').replace(/^group/, '-'))
+  }
+
+  public async getProfilePhoto(userId: number) {
+    const { photos } = await this.tryGetPhotos(userId)
+    if (photos.length < 1 || photos[0].length < 1) {
+      return null
+    }
+
+    const { file_id: fileId } = getBiggestPhoto(photos[0])
+    const { file_path: filePath } = await this.bot.api.getFile(fileId)
+    const fileUrl = `https://api.telegram.org/file/bot${this.bot.token}/${filePath}`
+
+    const res = await fetch(fileUrl, { agent: this.agent })
+
+    return res
   }
 
   private botOnMessage = async (ctx: Context) => {
@@ -82,6 +112,20 @@ export class BotService {
         timestamp: msg.date * 1000,
       },
     ])
+  }
+
+  private async tryGetPhotos(userId: number) {
+    try {
+      return await this.bot.api.getUserProfilePhotos(userId, {
+        limit: 1,
+      })
+    } catch (e: any) {
+      if (e.message.includes('user not found')) {
+        return { photos: [] }
+      } else {
+        throw e
+      }
+    }
   }
 
   private async setWebhookUrl() {
@@ -113,4 +157,9 @@ function getProxyAgent() {
   }
 
   return createHttpsProxyAgent(proxy)
+}
+
+function getBiggestPhoto(photos: PhotoSize[]): PhotoSize {
+  const sorted = photos.sort((a, b) => b.width - a.width)
+  return sorted[0]
 }
