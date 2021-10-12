@@ -7,12 +7,13 @@ import { ImportModule } from './import/import.module'
 import { BotModule } from './bot/bot.module'
 import meilisearchConfig from './config/meilisearch.config'
 import botConfig from './config/bot.config'
+import httpConfig from './config/http.config'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [meilisearchConfig, botConfig],
+      load: [meilisearchConfig, botConfig, httpConfig],
     }),
     SearchModule,
     ImportModule,
