@@ -24,6 +24,7 @@ async function bootstrap() {
     new FastifyAdapter({
       bodyLimit: 100 * 1024 * 1024,
     }),
+    { cors: true },
   )
   app.setGlobalPrefix('/api/v1')
 

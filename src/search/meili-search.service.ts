@@ -38,8 +38,9 @@ export class MeiliSearchService {
     const settings: Settings = {
       searchableAttributes: ['text'],
       filterableAttributes: ['chatId', 'fromId'],
+      sortableAttributes: ['timestamp'],
     }
-    const sortableAttributes = [
+    const rankingRules = [
       'words',
       'sort',
       'typo',
@@ -59,10 +60,9 @@ export class MeiliSearchService {
       }
     }
 
-    const currentSortableAttributes =
-      await this.messagesIndex.getSortableAttributes()
-    if (!deepEqual(currentSortableAttributes, sortableAttributes)) {
-      await this.messagesIndex.updateSortableAttributes(sortableAttributes)
+    const currentRankingRules = await this.messagesIndex.getRankingRules()
+    if (!deepEqual(currentRankingRules, rankingRules)) {
+      await this.messagesIndex.updateRankingRules(rankingRules)
     }
   }
 

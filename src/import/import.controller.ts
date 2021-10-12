@@ -72,6 +72,9 @@ export class ImportController {
                 .map((item) => (typeof item === 'string' ? item : item.text))
                 .join('')
             : text
+          if (!searchable) {
+            break
+          }
           const messageIndex: MessageIndex = {
             id: `${chatId}__${id}`,
             messageId: id,
