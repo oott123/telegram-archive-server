@@ -2,8 +2,19 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import meilisearchConfig from '../config/meilisearch.config'
 import { Index, MeiliSearch, Settings } from 'meilisearch'
-import { MessageIndex } from 'src/types/indexes'
-import deepEqual from 'deep-equal'
+import deepEqual = require('deep-equal')
+
+export type MessageIndex = {
+  id: string
+  chatId: string
+  fromId: string
+  fromName: string
+  /** searchable text */
+  text: string
+  raw: any
+  from: 'import' | 'bot'
+  timestamp: number
+}
 
 @Injectable()
 export class MeiliSearchService {
@@ -25,7 +36,7 @@ export class MeiliSearchService {
   async migrate(): Promise<void> {
     const settings: Settings = {
       searchableAttributes: ['text'],
-      filterableAttributes: ['chatId', 'senderId'],
+      filterableAttributes: ['chatId', 'fromId'],
     }
     const sortableAttributes = [
       'words',
@@ -35,6 +46,9 @@ export class MeiliSearchService {
       'exactness',
       'timestamp:desc',
     ]
+
+    await this.client.getOrCreateIndex(this.messagesIndex.uid)
+    await this.messagesIndex.fetchInfo()
 
     const currentSettings = await this.messagesIndex.getSettings()
     for (const key of Object.keys(settings)) {
@@ -55,11 +69,11 @@ export class MeiliSearchService {
     await this.messagesIndex.addDocuments(messages)
   }
 
-  async search(query: string, chatId: number, senderId?: number) {
+  async search(query: string, chatId: string, fromId?: number) {
     const result = await this.messagesIndex.search<MessageIndex>(query, {
       filter: [
         `chatId = ${chatId}`,
-        ...[senderId == null ? [] : [`senderId = ${senderId}`]],
+        ...[fromId == null ? [] : [`fromId = ${fromId}`]],
       ],
     })
     return result
