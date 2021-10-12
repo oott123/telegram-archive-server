@@ -58,13 +58,19 @@ export class ImportController {
         case 'message':
           if (Array.isArray(text)) {
             // check text has text
-            if (text.some((item) => !('text' in item))) {
+            if (
+              text
+                .filter((item) => typeof item !== 'string')
+                .some((item) => typeof item.text !== 'string')
+            ) {
               console.warn('message text dont have text', message)
               break
             }
           }
           const searchable = Array.isArray(text)
-            ? text.map(({ text }) => text).join('')
+            ? text
+                .map((item) => (typeof item === 'string' ? item : item.text))
+                .join('')
             : text
           const messageIndex: MessageIndex = {
             id: `${chatId}__${id}`,
@@ -85,11 +91,8 @@ export class ImportController {
           break
       }
 
-      if (messageBuffer.length >= 1000) {
+      if (messageBuffer.length >= 10000) {
         messageCount += messageBuffer.length
-        debug(
-          `import from telegram group export: ${groupType}:${groupId}, ${messageCount}/${messageBuffer.length}`,
-        )
         await this.searchService.importMessages(messageBuffer)
         messageBuffer.length = 0
       }
@@ -97,12 +100,13 @@ export class ImportController {
 
     if (messageBuffer.length > 0) {
       messageCount += messageBuffer.length
-      debug(
-        `import from telegram group export: ${groupType}:${groupId}, ${messageCount}/${messageBuffer.length}`,
-      )
       await this.searchService.importMessages(messageBuffer)
     }
 
-    return { imported: messageCount }
+    debug(
+      `import from telegram group export: ${groupType}:${groupId}, ${messageCount} of ${messages.length} messages has been queued`,
+    )
+
+    return { queued: messageCount }
   }
 }
