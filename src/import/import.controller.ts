@@ -1,5 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Post,
+  Headers,
+  ForbiddenException,
+  Inject,
+} from '@nestjs/common'
+import { ConfigType } from '@nestjs/config'
+import { timingSafeEqual } from 'crypto'
 import Debug from 'debug'
+import authConfig from 'src/config/auth.config'
 import {
   MeiliSearchService,
   MessageIndex,
@@ -29,10 +39,32 @@ const TelegramExportGroupTypeMap = {
 
 @Controller('import')
 export class ImportController {
-  constructor(private readonly searchService: MeiliSearchService) {}
+  private importToken: string
+
+  constructor(
+    private readonly searchService: MeiliSearchService,
+    @Inject(authConfig.KEY) authCfg: ConfigType<typeof authConfig>,
+  ) {
+    this.importToken = authCfg.importToken
+    if (!this.importToken) {
+      throw new Error('please set AUTH_IMPORT_TOKEN to keep your data safe')
+    }
+  }
 
   @Post('fromTelegramGroupExport')
-  async fromTelegramGroupExport(@Body() body: TelegramExportGroup) {
+  async fromTelegramGroupExport(
+    @Body() body: TelegramExportGroup,
+    @Headers('Authorization') authHeader: string,
+  ) {
+    const auth = `${authHeader}`.split(' ')[1]
+    if (!auth) {
+      throw new ForbiddenException('auth not found')
+    }
+
+    if (!this.compareImportToken(auth)) {
+      throw new ForbiddenException('invalid token')
+    }
+
     const { id: groupId, type: groupType, messages } = body
     if (!groupId) {
       throw new Error('groupId is required')
@@ -112,5 +144,13 @@ export class ImportController {
     )
 
     return { queued: messageCount }
+  }
+
+  private compareImportToken(token: string) {
+    try {
+      return timingSafeEqual(Buffer.from(token), Buffer.from(this.importToken))
+    } catch (e) {
+      return false
+    }
   }
 }

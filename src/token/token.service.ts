@@ -14,6 +14,9 @@ export class TokenService {
 
   constructor(@Inject(authConfig.KEY) authCfg: ConfigType<typeof authConfig>) {
     this.secret = authCfg.jwtSecret
+    if (!this.secret) {
+      throw new Error('please set AUTH_JWT_SECRET to keep your data safe')
+    }
   }
 
   public sign(payload: AppTokenPayload) {
