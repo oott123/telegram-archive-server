@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <title>搜索</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch/templates/basic_search.css"
+    />
+    <style type="text/css">
+      .hit-title {
+        font-size: 0.9em;
+        color: #60bc55;
+      }
+
+      .hit-item {
+        display: flex;
+      }
+
+      .hit-avatar {
+        width: 32px;
+        height: 32px;
+        margin-right: 16px;
+        align-self: center;
+      }
+
+      .hit-avatar img {
+        width: 100%;
+        border-radius: 64px;
+        overflow: hidden;
+      }
+
+      .hit-message {
+        flex: 1;
+      }
+
+      .hit-time {
+        text-decoration: none;
+        color: #999;
+      }
+
+      .hit-text {
+        word-break: break-word;
+      }
+
+      #stats {
+        padding: 12px 0;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div id="searchbox" focus></div>
+      <div id="stats"></div>
+      <div id="hits"></div>
+    </div>
+    <iframe
+      src="data:,"
+      frameborder="0"
+      name="tglink"
+      id="tglink"
+      style="display: none"
+    ></iframe>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch@0.3.2/dist/instant-meilisearch.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4"></script>
+  <script>
+    ;(function () {
+      loadParamsFromUrl()
+      const serverUrl = localStorage.tas_server //'http://localhost:3100/api/v1'
+      const indexName = localStorage.tas_indexName // 'supergroup***REMOVED***'
+      const authKey = localStorage.tas_authKey
+      if (!serverUrl || !indexName) {
+        document.getElementById('stats').innerText =
+          '未找到索引配置，请从机器人按钮访问'
+      } else if (!checkKeyExp(authKey)) {
+        document.getElementById('stats').innerText =
+          '鉴权已过期，请从机器人按钮访问'
+      }
+      {
+        startSearch()
+      }
+      function loadParamsFromUrl() {
+        const url = new URL(location.href)
+        if (url.searchParams.has('tas_server')) {
+          for (const key of Object.keys(localStorage)) {
+            if (key.startsWith('tas_')) {
+              delete localStorage[key]
+            }
+          }
+          localStorage.tas_server = url.searchParams.get('tas_server')
+          url.searchParams.delete('tas_server')
+        }
+
+        const readFromUrl = ['tas_indexName', 'tas_authKey']
+        for (const key of readFromUrl) {
+          if (url.searchParams.has(key)) {
+            localStorage[key] = url.searchParams.get(key)
+            url.searchParams.delete(key)
+          }
+        }
+
+        history.replaceState(null, document.title, url.toString())
+      }
+
+      function startSearch() {
+        const search = instantsearch({
+          indexName,
+          searchClient: instantMeiliSearch(
+            `${serverUrl}/search/compilable/meili`,
+            authKey,
+          ),
+          routing: {
+            stateMapping: instantsearch.stateMappings.singleIndex(indexName),
+          },
+          stalledSearchDelay: 1000,
+        })
+
+        search.addWidgets([
+          instantsearch.widgets.searchBox({
+            container: '#searchbox',
+            showLoadingIndicator: true,
+          }),
+          instantsearch.widgets.configure({
+            hitsPerPage: 50,
+            attributesToSnippet: ['text:60'],
+            attributesToHighlight: ['text'],
+          }),
+          instantsearch.widgets.hits({
+            container: '#hits',
+            transformItems: (items) =>
+              items.map((item) => ({
+                ...item,
+                link: `tg://privatepost?channel=${item.chatId.replace(
+                  /^[a-z]+/,
+                  '',
+                )}&post=${item.messageId}`,
+                time: new Intl.DateTimeFormat('zh-CN', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hourCycle: 'h23',
+                }).format(new Date(item.timestamp)),
+              })),
+            templates: {
+              empty: '没有找到 {{ query }}',
+              item: `
+      <div class="hit-item">
+        <div class="hit-avatar">
+          <img src="${serverUrl}/profile/{{fromId}}/photo" alt="">
+        </div>
+        <div class="hit-message">
+          <div class="hit-title">
+            <span class="hit-from-name">{{fromName}}</span>
+            <a class="hit-time" href="{{link}}" target="tglink" rel="noopener noreferer">{{time}}</a>
+          </div>
+          <div class="hit-text">{{#helpers.highlight}}{ "attribute": "text" }{{/helpers.highlight}}</div>
+        </div>
+      </div>
+                `,
+            },
+          }),
+          instantsearch.widgets.stats({
+            container: '#stats',
+            templates: {
+              text: `找到 {{#helpers.formatNumber}}{{nbHits}}{{/helpers.formatNumber}} 条结果，用时 {{processingTimeMS}} 毫秒。`,
+            },
+          }),
+        ])
+        search.on('error', ({ error }) => {
+          document.getElementById('stats').innerText =
+            `${error.message}`.replace(/^MeiliSearchApiError: /, '')
+        })
+        search.start()
+      }
+
+      function checkKeyExp(authKey) {
+        try {
+          return (
+            Date.now() - JSON.parse(atob(authKey.split('.')[1])).exp * 1000 < 0
+          )
+        } catch (e) {
+          console.error(e)
+          return false
+        }
+      }
+    })()
+  </script>
+</html>

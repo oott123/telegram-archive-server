@@ -9,4 +9,5 @@ FROM gcr.io/distroless/nodejs:14
 WORKDIR /app
 COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/public /app/public
 CMD ["/app/dist/main.js"]
