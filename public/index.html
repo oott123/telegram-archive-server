@@ -68,8 +68,8 @@
   <script>
     ;(function () {
       loadParamsFromUrl()
-      const serverUrl = localStorage.tas_server //'http://localhost:3100/api/v1'
-      const indexName = localStorage.tas_indexName // 'supergroup***REMOVED***'
+      const serverUrl = localStorage.tas_server
+      const indexName = localStorage.tas_indexName
       const authKey = localStorage.tas_authKey
       if (!serverUrl || !indexName) {
         document.getElementById('stats').innerText =
