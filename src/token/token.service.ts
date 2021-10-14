@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import jwt = require('jsonwebtoken')
 import httpConfig from '../config/http.config'
@@ -21,6 +21,10 @@ export class TokenService {
   }
 
   public verify(token: string) {
-    return jwt.verify(token, this.secret) as AppTokenPayload
+    try {
+      return jwt.verify(token, this.secret) as AppTokenPayload
+    } catch (err) {
+      throw new ForbiddenException('Invalid token')
+    }
   }
 }
