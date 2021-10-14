@@ -37,7 +37,7 @@ export class MeiliSearchService {
   async migrate(): Promise<void> {
     const settings: Settings = {
       searchableAttributes: ['text'],
-      filterableAttributes: ['chatId', 'fromId'],
+      filterableAttributes: ['chatId', 'fromId', 'timestamp'],
       sortableAttributes: ['timestamp'],
       synonyms: {
         妈: ['🐴', '马'],
