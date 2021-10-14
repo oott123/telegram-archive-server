@@ -1,16 +1,33 @@
-import { Body, Controller, Param, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Headers,
+  Param,
+  Post,
+} from '@nestjs/common'
 import { SearchParams } from 'meilisearch'
+import { TokenService } from 'src/token/token.service'
 import { MeiliSearchService } from './meili-search.service'
 
 @Controller('search')
 export class SearchController {
-  constructor(private meiliSearch: MeiliSearchService) {}
+  constructor(
+    private meiliSearch: MeiliSearchService,
+    private tokenService: TokenService,
+  ) {}
 
   @Post('compilable/meili/indexes/:chatId/search')
   async meilisearchCompilable(
-    @Param('chatId') chatId: string,
+    @Param('chatId') chatIdInput: string,
+    @Headers('X-Meili-API-Key') token: string,
     @Body() body: SearchParams & { q: string },
   ) {
+    const { chatId } = this.tokenService.verify(token)
+    if (chatId !== chatIdInput) {
+      throw new ForbiddenException('无权访问该聊天，请从机器人按钮重新登录')
+    }
+
     const { q, ...options } = body
     const filteredOptions = removeKeysFromObject(options, [
       'filter',

@@ -29,7 +29,7 @@ async function bootstrap() {
     }),
     {
       cors: {
-        allowedHeaders: ['Content-Type', 'Authorization'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Meili-API-Key'],
         origin: '*',
         maxAge: 86400,
       },
