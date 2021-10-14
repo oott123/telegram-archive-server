@@ -1,7 +1,7 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import jwt = require('jsonwebtoken')
-import httpConfig from '../config/http.config'
+import authConfig from '../config/auth.config'
 
 export type AppTokenPayload = {
   chatId: string
@@ -12,8 +12,8 @@ export type AppTokenPayload = {
 export class TokenService {
   private secret: string
 
-  constructor(@Inject(httpConfig.KEY) httpCfg: ConfigType<typeof httpConfig>) {
-    this.secret = httpCfg.jwtSecret
+  constructor(@Inject(authConfig.KEY) authCfg: ConfigType<typeof authConfig>) {
+    this.secret = authCfg.jwtSecret
   }
 
   public sign(payload: AppTokenPayload) {

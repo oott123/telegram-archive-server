@@ -6,16 +6,17 @@ import { SearchModule } from './search/search.module'
 import { ImportModule } from './import/import.module'
 import { BotModule } from './bot/bot.module'
 import { UserModule } from './user/user.module'
-import { TokenModule } from './token/token.module';
+import { TokenModule } from './token/token.module'
 import meilisearchConfig from './config/meilisearch.config'
 import botConfig from './config/bot.config'
 import httpConfig from './config/http.config'
+import authConfig from './config/auth.config'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [meilisearchConfig, botConfig, httpConfig],
+      load: [meilisearchConfig, botConfig, httpConfig, authConfig],
     }),
     CacheModule.register({
       isGlobal: true,
