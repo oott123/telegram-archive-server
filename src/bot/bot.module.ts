@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { SearchModule } from 'src/search/search.module'
+import { SearchModule } from '../search/search.module'
 import { BotService } from './bot.service'
 import { WebhookController } from './webhook.controller'
 

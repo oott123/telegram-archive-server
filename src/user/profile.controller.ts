@@ -7,7 +7,7 @@ import {
   CacheInterceptor,
   Header,
 } from '@nestjs/common'
-import { BotService } from 'src/bot/bot.service'
+import { BotService } from '../bot/bot.service'
 
 @Controller('profile')
 export class ProfileController {

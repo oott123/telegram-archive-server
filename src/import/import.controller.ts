@@ -3,7 +3,7 @@ import Debug from 'debug'
 import {
   MeiliSearchService,
   MessageIndex,
-} from 'src/search/meili-search.service'
+} from '../search/meili-search.service'
 
 const debug = Debug('app:import:import.controller')
 

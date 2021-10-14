@@ -2,11 +2,14 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { Bot, Context, GrammyError, NextFunction } from 'grammy'
 import botConfig from '../config/bot.config'
-import { MeiliSearchService } from 'src/search/meili-search.service'
-import httpConfig from 'src/config/http.config'
+import { MeiliSearchService } from '../search/meili-search.service'
+import httpConfig from '../config/http.config'
 import { PhotoSize, Update } from '@grammyjs/types'
+import Debug = require('debug')
 import fetch from 'node-fetch'
 import createHttpsProxyAgent = require('https-proxy-agent')
+
+const debug = Debug('app:bot:bot.service')
 
 @Injectable()
 export class BotService {
@@ -124,43 +127,44 @@ export class BotService {
     }
 
     if (chat.type === 'private') {
-      await ctx.reply('本机器人仅供群组使用。')
+      await ctx.reply('？')
       return
     }
 
     const realId = `${chat.id}`.replace(/^-100/, '')
     const chatId = `${chat.type}${realId}`
-    const authUrl = new URL('bot/authCallback', this.baseUrl)
+    const authUrl = new URL(this.baseUrl + '/user/auth/viaTelegram')
     authUrl.searchParams.append('chatId', chatId)
 
     try {
-      await ctx.reply(
-        '🔍群内消息搜索服务上线了，支持中文模糊检索，妈妈再也不用担心我找不到消息了！',
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '🔍搜索',
-                  login_url: {
-                    url: authUrl.toString(),
-                    request_write_access: true,
-                  },
+      await ctx.reply('🔍群内消息搜索试运行中，有问题请点我头像', {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '搜索',
+                login_url: {
+                  url: authUrl.toString(),
+                  request_write_access: true,
                 },
-              ],
+              },
             ],
-          },
+          ],
         },
-      )
+      })
     } catch (e: any) {
-      if (e instanceof GrammyError) {
-        if (e.description.includes('login URL is invalid')) {
-          await ctx.reply(
-            `当前无法使用登录，请联系 @BotFather 将我的域名修改为 ${authUrl.hostname}`,
-          )
-        }
+      if (
+        e instanceof GrammyError &&
+        (e.description.includes('login URL is invalid') ||
+          e.description.includes('BOT_DOMAIN_INVALID'))
+      ) {
+        await ctx.reply(
+          `当前无法使用登录，请联系 @BotFather 在 Settings / Domain 处将域名修改为 <code>${authUrl.hostname}</code>`,
+          { parse_mode: 'HTML' },
+        )
+      } else {
+        throw e
       }
-      throw e
     }
   }
 
