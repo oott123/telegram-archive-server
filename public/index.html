@@ -77,8 +77,7 @@
       } else if (!checkKeyExp(authKey)) {
         document.getElementById('stats').innerText =
           '鉴权已过期，请从机器人按钮访问'
-      }
-      {
+      } else {
         startSearch()
       }
       function loadParamsFromUrl() {
