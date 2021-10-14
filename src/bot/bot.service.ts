@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { Bot, Context } from 'grammy'
+import { Bot, Context, GrammyError, NextFunction } from 'grammy'
 import botConfig from '../config/bot.config'
 import { MeiliSearchService } from 'src/search/meili-search.service'
 import httpConfig from 'src/config/http.config'
@@ -24,7 +24,7 @@ export class BotService {
     private search: MeiliSearchService,
   ) {
     this.useWebhook = botCfg.webhook
-    this.baseUrl = `${httpCfg.baseUrl}/${httpCfg.globalPrefix}`
+    this.baseUrl = `${httpCfg.baseUrl}${httpCfg.globalPrefix}`
     this.updateToken = botCfg.updateToken || botCfg.token
 
     if (this.useWebhook && !this.baseUrl) {
@@ -48,6 +48,8 @@ export class BotService {
     if (botCfg.followEdit) {
       this.bot.on('edit', this.botOnMessage)
     }
+
+    this.bot.command('search', this.botOnSearchCommand)
   }
 
   async start() {
@@ -87,7 +89,8 @@ export class BotService {
     return res
   }
 
-  private botOnMessage = async (ctx: Context) => {
+  private botOnMessage = async (ctx: Context, next: NextFunction) => {
+    next()
     const { msg, chat, from } = ctx
     if (!chat || !msg || !from) {
       return
@@ -112,6 +115,53 @@ export class BotService {
         timestamp: msg.date * 1000,
       },
     ])
+  }
+
+  private botOnSearchCommand = async (ctx: Context) => {
+    const { msg, chat, from } = ctx
+    if (!chat || !msg || !from) {
+      return
+    }
+
+    if (chat.type === 'private') {
+      await ctx.reply('本机器人仅供群组使用。')
+      return
+    }
+
+    const realId = `${chat.id}`.replace(/^-100/, '')
+    const chatId = `${chat.type}${realId}`
+    const authUrl = new URL('bot/authCallback', this.baseUrl)
+    authUrl.searchParams.append('chatId', chatId)
+
+    try {
+      await ctx.reply(
+        '🔍群内消息搜索服务上线了，支持中文模糊检索，妈妈再也不用担心我找不到消息了！',
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '🔍搜索',
+                  login_url: {
+                    url: authUrl.toString(),
+                    request_write_access: true,
+                  },
+                },
+              ],
+            ],
+          },
+        },
+      )
+    } catch (e: any) {
+      if (e instanceof GrammyError) {
+        if (e.description.includes('login URL is invalid')) {
+          await ctx.reply(
+            `当前无法使用登录，请联系 @BotFather 将我的域名修改为 ${authUrl.hostname}`,
+          )
+        }
+      }
+      throw e
+    }
   }
 
   private async tryGetPhotos(userId: number) {
