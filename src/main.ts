@@ -48,7 +48,7 @@ async function bootstrap() {
   await search.migrate()
 
   debug('starting http')
-  await app.listen(httpCfg.port)
+  await app.listen(httpCfg.port, httpCfg.host)
 }
 
 bootstrap().catch((err) => {
