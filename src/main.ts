@@ -50,4 +50,8 @@ async function bootstrap() {
   debug('starting http')
   await app.listen(httpCfg.port)
 }
-bootstrap()
+
+bootstrap().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
