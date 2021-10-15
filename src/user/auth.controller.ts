@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { createHash, createHmac, timingSafeEqual } from 'crypto'
+import { BotService } from 'src/bot/bot.service'
 import { TokenService } from 'src/token/token.service'
 import botConfig from '../config/bot.config'
 import httpConfig from '../config/http.config'
@@ -23,6 +24,7 @@ export class AuthController {
     @Inject(httpConfig.KEY) httpCfg: ConfigType<typeof httpConfig>,
     @Inject(botConfig.KEY) botCfg: ConfigType<typeof botConfig>,
     private tokenService: TokenService,
+    private botService: BotService,
   ) {
     this.botToken = botCfg.token
     this.uiUrl = httpCfg.uiUrl
@@ -54,7 +56,12 @@ export class AuthController {
 
     await this.verifyHash(telegramLogin, hash)
 
-    const token = this.tokenService.sign({ userId: Number(userId), chatId })
+    const numberUserId = Number(userId)
+    if (!(await this.botService.checkIfUserIsMember(numberUserId, chatId))) {
+      throw new ForbiddenException('User is not a member of this chat')
+    }
+
+    const token = this.tokenService.sign({ userId: numberUserId, chatId })
 
     const url = new URL(`${this.uiUrl}/index.html`)
     url.searchParams.append('tas_server', this.baseUrl)
