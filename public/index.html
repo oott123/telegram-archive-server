@@ -1,72 +1,67 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
-  <head>
-    <meta charset="utf-8" />
-    <title>搜索</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch/templates/basic_search.css"
-    />
-    <style type="text/css">
-      .hit-title {
-        font-size: 0.9em;
-        color: #60bc55;
-      }
 
-      .hit-item {
-        display: flex;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0" />
+  <title>搜索</title>
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch/templates/basic_search.css" />
+  <style type="text/css">
+    .hit-title {
+      font-size: 0.9em;
+      color: #60bc55;
+    }
 
-      .hit-avatar {
-        width: 32px;
-        height: 32px;
-        margin-right: 16px;
-        align-self: center;
-      }
+    .hit-item {
+      display: flex;
+    }
 
-      .hit-avatar img {
-        width: 100%;
-        border-radius: 64px;
-        overflow: hidden;
-      }
+    .hit-avatar {
+      width: 32px;
+      height: 32px;
+      margin-right: 16px;
+      align-self: center;
+    }
 
-      .hit-message {
-        flex: 1;
-      }
+    .hit-avatar img {
+      width: 100%;
+      border-radius: 64px;
+      overflow: hidden;
+    }
 
-      .hit-time {
-        text-decoration: none;
-        color: #999;
-      }
+    .hit-message {
+      flex: 1;
+    }
 
-      .hit-text {
-        word-break: break-word;
-      }
+    .hit-time {
+      text-decoration: none;
+      color: #999;
+    }
 
-      #stats {
-        padding: 12px 0;
-        color: #666;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrapper">
-      <div id="searchbox" focus></div>
-      <div id="stats"></div>
-      <div id="hits"></div>
-    </div>
-    <iframe
-      src="data:,"
-      frameborder="0"
-      name="tglink"
-      id="tglink"
-      style="display: none"
-    ></iframe>
-  </body>
-  <script src="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch@0.3.2/dist/instant-meilisearch.umd.min.js"></script>
+    .hit-text {
+      word-break: break-word;
+    }
+
+    #stats {
+      padding: 12px 0;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div id="searchbox" focus></div>
+    <div id="stats"></div>
+    <div id="hits"></div>
+  </div>
+  <iframe src="data:," frameborder="0" name="tglink" id="tglink" style="display: none"></iframe>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch@0.3.2/dist/instant-meilisearch.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4"></script>
   <script>
-    ;(function () {
+    ; (function () {
       loadParamsFromUrl()
       const serverUrl = localStorage.tas_server
       const indexName = localStorage.tas_indexName
@@ -80,6 +75,24 @@
       } else {
         startSearch()
       }
+
+      if (/(iPhone|iPod|iPad)/.test(navigator.userAgent)) {
+        document.body.addEventListener('click', function (e) {
+          for (
+            let target = e.target;
+            target && target != this;
+            target = target.parentNode
+          ) {
+            if (target.matches('[data-ios-universal-links-href]')) {
+              const href = target.dataset.iosUniversalLinksHref
+              location.href = href
+              e.preventDefault()
+              break
+            }
+          }
+        })
+      }
+
       function loadParamsFromUrl() {
         const url = new URL(location.href)
         if (url.searchParams.has('tas_server')) {
@@ -135,6 +148,10 @@
                   /^[a-z]+/,
                   '',
                 )}&post=${item.messageId}`,
+                iosLink: `https://t.me/c/${item.chatId.replace(
+                  /^[a-z]+/,
+                  '',
+                )}/${item.messageId}`,
                 time: new Intl.DateTimeFormat('zh-CN', {
                   year: 'numeric',
                   month: '2-digit',
@@ -154,7 +171,7 @@
         <div class="hit-message">
           <div class="hit-title">
             <span class="hit-from-name">{{fromName}}</span>
-            <a class="hit-time" href="{{link}}" target="tglink" rel="noopener noreferer">{{time}}</a>
+            <a class="hit-time" data-ios-universal-links-href="{{iosLink}}" href="{{link}}" target="tglink" rel="noopener noreferer">{{time}}</a>
           </div>
           <div class="hit-text">{{#helpers.highlight}}{ "attribute": "text" }{{/helpers.highlight}}</div>
         </div>
@@ -179,7 +196,8 @@
       function checkKeyExp(authKey) {
         try {
           return (
-            Date.now() - JSON.parse(atob(authKey.split('.')[1])).exp * 1000 < 0
+            Date.now() - JSON.parse(atob(authKey.split('.')[1])).exp * 1000 <
+            0
           )
         } catch (e) {
           console.error(e)
@@ -188,4 +206,6 @@
       }
     })()
   </script>
+</body>
+
 </html>
