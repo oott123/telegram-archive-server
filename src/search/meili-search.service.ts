@@ -1,7 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common'
+import {
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+} from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import meilisearchConfig from '../config/meilisearch.config'
 import { Index, MeiliSearch, Settings } from 'meilisearch'
+import { Cache } from 'cache-manager'
 import deepEqual = require('deep-equal')
 
 export type MessageIndex = {
@@ -17,21 +23,59 @@ export type MessageIndex = {
   timestamp: number
 }
 
+const MESSAGES_QUEUE_KEY = 'messages'
+const INSERT_BATCH = 100
+const INSERT_TIMEOUT = 60 * 1000
+
 @Injectable()
-export class MeiliSearchService {
+export class MeiliSearchService implements OnModuleDestroy {
   private client: MeiliSearch
   private indexPrefix: string
   private messagesIndex: Index<MessageIndex>
+  private messagesQueue: MessageIndex[]
+  private queueTimer: any
 
   constructor(
     @Inject(meilisearchConfig.KEY)
     msConfig: ConfigType<typeof meilisearchConfig>,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {
     this.client = new MeiliSearch(msConfig)
     this.indexPrefix = msConfig.indexPrefix
     this.messagesIndex = this.client.index<MessageIndex>(
       `${this.indexPrefix}messages`,
     )
+    this.messagesQueue = []
+  }
+
+  async onModuleDestroy() {
+    await this.writeToCache()
+  }
+
+  async recoverFromCache() {
+    const queue = await this.cache.get<MessageIndex[]>(MESSAGES_QUEUE_KEY)
+    if (queue && Array.isArray(queue)) {
+      this.messagesQueue = queue.concat(this.messagesQueue)
+    }
+    if (this.messagesQueue.length > 0) {
+      await this.importAllQueued()
+    }
+  }
+
+  async writeToCache() {
+    await this.cache.set(MESSAGES_QUEUE_KEY, this.messagesQueue)
+  }
+
+  async importAllQueued() {
+    const queue = this.messagesQueue
+    this.messagesQueue = []
+    try {
+      await this.importMessages(queue)
+    } catch (e) {
+      this.messagesQueue = queue.concat(this.messagesQueue)
+      throw e
+    }
+    await this.writeToCache()
   }
 
   async migrate(): Promise<void> {
@@ -69,6 +113,22 @@ export class MeiliSearchService {
     const currentRankingRules = await this.messagesIndex.getRankingRules()
     if (!deepEqual(currentRankingRules, rankingRules)) {
       await this.messagesIndex.updateRankingRules(rankingRules)
+    }
+  }
+
+  queueMessage(message: MessageIndex) {
+    this.messagesQueue.push(message)
+
+    this.writeToCache().catch(console.error)
+
+    this.queueTimer && clearTimeout(this.queueTimer)
+
+    if (this.messagesQueue.length >= INSERT_BATCH) {
+      this.importAllQueued().catch(console.error)
+    } else {
+      this.queueTimer = setTimeout(() => {
+        this.importAllQueued().catch(console.error)
+      }, INSERT_TIMEOUT)
     }
   }
 

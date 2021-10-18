@@ -105,19 +105,17 @@ export class BotService {
       return
     }
 
-    await this.search.importMessages([
-      {
-        id: `${chatId}__${msg.message_id}`,
-        messageId: msg.message_id,
-        chatId,
-        fromId: `user${from.id}`,
-        fromName: joinNames(from.first_name, from.last_name),
-        text: searchable,
-        raw: ctx.msg,
-        from: 'bot',
-        timestamp: msg.date * 1000,
-      },
-    ])
+    await this.search.queueMessage({
+      id: `${chatId}__${msg.message_id}`,
+      messageId: msg.message_id,
+      chatId,
+      fromId: `user${from.id}`,
+      fromName: joinNames(from.first_name, from.last_name),
+      text: searchable,
+      raw: ctx.msg,
+      from: 'bot',
+      timestamp: msg.date * 1000,
+    })
   }
 
   private botOnSearchCommand = async (ctx: Context) => {

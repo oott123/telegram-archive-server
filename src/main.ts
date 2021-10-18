@@ -46,6 +46,10 @@ async function bootstrap() {
   debug('migrating search')
   const search = app.get(MeiliSearchService)
   await search.migrate()
+  await search.recoverFromCache()
+
+  debug('enable shutdown hooks')
+  app.enableShutdownHooks()
 
   debug('starting http')
   await app.listen(httpCfg.port, httpCfg.host)
