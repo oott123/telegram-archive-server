@@ -1,5 +1,5 @@
 import { CacheModule, Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { SearchModule } from './search/search.module'
@@ -13,6 +13,8 @@ import httpConfig from './config/http.config'
 import authConfig from './config/auth.config'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import cacheConfig from './config/cache.config'
+import redisStore = require('cache-manager-ioredis')
 
 @Module({
   imports: [
@@ -21,10 +23,24 @@ import { join } from 'path'
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [meilisearchConfig, botConfig, httpConfig, authConfig],
+      load: [meilisearchConfig, botConfig, httpConfig, authConfig, cacheConfig],
     }),
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
+      useFactory: async (cacheCfg: ConfigType<typeof cacheConfig>) => {
+        if (cacheCfg.cacheStore === 'memory') {
+          return {}
+        } else if (cacheCfg.cacheStore === 'redis') {
+          return {
+            ...cacheCfg.redis,
+            store: redisStore,
+            ttl: cacheCfg.ttl,
+          }
+        } else {
+          throw new Error(`No such cache store ${cacheCfg.cacheStore}`)
+        }
+      },
+      inject: [cacheConfig.KEY],
     }),
     SearchModule,
     ImportModule,

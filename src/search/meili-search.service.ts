@@ -8,7 +8,10 @@ import { ConfigType } from '@nestjs/config'
 import meilisearchConfig from '../config/meilisearch.config'
 import { Index, MeiliSearch, Settings } from 'meilisearch'
 import { Cache } from 'cache-manager'
+import Debug from 'debug'
 import deepEqual = require('deep-equal')
+
+const debug = Debug('app:search:meili')
 
 export type MessageIndex = {
   id: string
@@ -49,6 +52,7 @@ export class MeiliSearchService implements OnModuleDestroy {
   }
 
   async onModuleDestroy() {
+    debug('app exiting, writing queue to cache')
     await this.writeToCache()
   }
 
@@ -58,15 +62,18 @@ export class MeiliSearchService implements OnModuleDestroy {
       this.messagesQueue = queue.concat(this.messagesQueue)
     }
     if (this.messagesQueue.length > 0) {
+      debug(`${this.messagesQueue.length} items recovered from cache`)
       await this.importAllQueued()
     }
   }
 
   async writeToCache() {
-    await this.cache.set(MESSAGES_QUEUE_KEY, this.messagesQueue)
+    debug(`writing cache (${this.messagesQueue.length} items)`)
+    await this.cache.set(MESSAGES_QUEUE_KEY, this.messagesQueue, { ttl: 0 })
   }
 
   async importAllQueued() {
+    debug('importing all queued message')
     const queue = this.messagesQueue
     this.messagesQueue = []
     try {
@@ -117,6 +124,7 @@ export class MeiliSearchService implements OnModuleDestroy {
   }
 
   queueMessage(message: MessageIndex) {
+    debug('adding message to queue')
     this.messagesQueue.push(message)
 
     this.writeToCache().catch(console.error)
@@ -124,9 +132,11 @@ export class MeiliSearchService implements OnModuleDestroy {
     this.queueTimer && clearTimeout(this.queueTimer)
 
     if (this.messagesQueue.length >= INSERT_BATCH) {
+      debug('message batch reached')
       this.importAllQueued().catch(console.error)
     } else {
       this.queueTimer = setTimeout(() => {
+        debug('insert timeout reached')
         this.importAllQueued().catch(console.error)
       }, INSERT_TIMEOUT)
     }
