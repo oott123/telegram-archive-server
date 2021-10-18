@@ -61,8 +61,42 @@ docker run -d --restart=always --env-file=.env quay.io/oott123/telegram-archive-
 
 ![](./docs/assets/bot-set-domain.gif)
 
+### 导入老的聊天记录
+
+**当前仅支持超级群导入。**
+
+在桌面客户端点击三点按钮 - Export chat history，等待导出完成，得到 `result.json`。
+
+执行：
+
+```bash
+curl \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $AUTH_IMPORT_TOKEN" \
+  --data @result.json \
+  http://localhost:3100/api/v1/import/fromTelegramGroupExport
+```
+
+即可导入记录。注意只能导入单个群的记录。
+
 ## 开发
 
 ```bash
 DEBUG=app:*,grammy* yarn start:debug
 ```
+
+### 前端开发
+
+搜索服务鉴权后，服务端会跳转到：`$HTTP_UI_URL/index.html` 并带上以下 URL 参数：
+
+- `tas_server` - 服务器基础 URL，形如 `http://localhost:3100/api/v1`
+- `tas_indexName` - 群号，形如 `supergroup1234567890`
+- `tas_authKey` - 服务器签发的 JWT，可以用来作为 MeiliSearch 的 api key 使用。
+
+### MeiliSearch 兼容
+
+在 `/api/v1/search/compilable/meili` 处可以当作普通的 MeiliSearch 实例进行搜索。
+
+索引名应该使用形如 `supergroup1234567890` 的群号； API Key 则是服务端签发的 JWT。
+
+请注意 filter 由于安全原因暂时不可使用。
