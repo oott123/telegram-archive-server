@@ -34,8 +34,8 @@
 
 你需要：
 
-- 一个 Bot 帐号，事先获取它的 token；
-- 一个公网可及的 https 服务器（当然 http 的也凑合用）
+- 一个 Bot 帐号，事先获取它的 token
+- 一个公网可及的 https 服务器（当然 http 的也凑合用，只是不能开 webhook 了）
 - 一个**超级群**，目前只支持超级群
 - 一个 MeiliSearch 实例，配不配置 key 都行
 - 一个 Redis 实例，没有也行
