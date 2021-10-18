@@ -53,7 +53,8 @@ export class MeiliSearchService implements OnModuleDestroy {
 
   async onModuleDestroy() {
     debug('app exiting, writing queue to cache')
-    await this.writeToCache()
+    // await this.writeToCache()
+    await this.importAllQueued()
   }
 
   async recoverFromCache() {
@@ -73,6 +74,9 @@ export class MeiliSearchService implements OnModuleDestroy {
   }
 
   async importAllQueued() {
+    if (this.messagesQueue.length < 1) {
+      return
+    }
     debug('importing all queued message')
     const queue = this.messagesQueue
     this.messagesQueue = []

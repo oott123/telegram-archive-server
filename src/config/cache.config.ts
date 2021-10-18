@@ -7,6 +7,7 @@ export default registerAs('cache', () => ({
     port: Number(process.env.CACHE_REDIS_PORT || 6379),
     password: process.env.CACHE_REDIS_PASSWORD,
     db: Number(process.env.CACHE_REDIS_DB || 0),
+    keyPrefix: process.env.CACHE_REDIS_KEY_PREFIX || '',
   },
   ttl: 0,
 }))
