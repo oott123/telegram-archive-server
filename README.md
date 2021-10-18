@@ -55,6 +55,12 @@ docker run -d --restart=always --env-file=.env quay.io/oott123/telegram-archive-
 
 当然，也可以使用 Kubernetes 或者 docker-compose 运行。
 
+### 使用
+
+在群里发送 `/search`。Bot 可能会提示你设置 Domain，按提示设置即可。
+
+![](./docs/assets/bot-set-domain.gif)
+
 ## 开发
 
 ```bash
