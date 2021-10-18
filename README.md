@@ -1,6 +1,6 @@
 # Telegram Archive Server
 
-[![Docker Repository on Quay](https://quay.io/repository/oott123/telegram-archive-server/status 'Docker Repository on Quay')](https://quay.io/repository/oott123/telegram-archive-server) ![](https://img.shields.io/badge/CJK-ready-66ccff)
+[![Docker Repository on Quay](https://quay.io/repository/oott123/telegram-archive-server/status 'Docker Repository on Quay')](https://quay.io/repository/oott123/telegram-archive-server) ![CJK Ready](https://img.shields.io/badge/CJK-ready-66ccff) ![BSD 3 Clause Licensed](https://img.shields.io/github/license/oott123/telegram-archive-server)
 
 一个适合 CJK 环境的，Telegram 群聊搜索和归档机器人。
 
