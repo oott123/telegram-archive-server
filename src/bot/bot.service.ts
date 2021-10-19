@@ -93,7 +93,7 @@ export class BotService {
   }
 
   private botOnMessage = async (ctx: Context, next: NextFunction) => {
-    next()
+    await next()
     const { msg, chat, from } = ctx
     if (!chat || !msg || !from) {
       return
