@@ -1,6 +1,6 @@
 # Telegram Archive Server
 
-[![Docker](https://github.com/oott123/telegram-archive-server/actions/workflows/ci.yaml/badge.svg)](https://github.com/oott123/telegram-archive-server/actions/workflows/ci.yaml) [![CJK Ready](https://img.shields.io/badge/CJK-ready-66ccff)](./README.md) [![Releases](https://img.shields.io/github/package-json/v/oott123/telegram-archive-server/master?label=version)](https://github.com/oott123/telegram-archive-server/releases) [![quay.io](https://img.shields.io/badge/Browse%20on-quay.io-blue?logo=docker)](https://quay.io/repository/oott123/telegram-archive-server?tab=tags) [![BSD 3 Clause Licensed](https://img.shields.io/github/license/oott123/telegram-archive-server)](./LICENSE)
+[![Docker](https://github.com/oott123/telegram-archive-server/actions/workflows/ci.yaml/badge.svg)](https://github.com/oott123/telegram-archive-server/actions/workflows/ci.yaml) [![CJK Ready](https://img.shields.io/badge/CJK-ready-66ccff)](./README.md) [![Releases](https://img.shields.io/github/package-json/v/oott123/telegram-archive-server/master?label=version)](https://github.com/oott123/telegram-archive-server/releases) [![quay.io](https://img.shields.io/badge/Browse%20on-quay.io-blue?logo=docker&logoColor=white)](https://quay.io/repository/oott123/telegram-archive-server?tab=tags) [![BSD 3 Clause Licensed](https://img.shields.io/github/license/oott123/telegram-archive-server)](./LICENSE)
 
 一个适合 CJK 环境的，Telegram 群聊搜索和归档机器人。
 
