@@ -61,6 +61,13 @@ docker run -d --restart=always --env-file=.env quay.io/oott123/telegram-archive-
 
 ![](./docs/assets/bot-set-domain.gif)
 
+#### 获取用户头像
+
+用户必须满足以下条件，才能在搜索结果中展示头像：
+
+- 曾与 Bot 交互过（发送过消息，或是授权登录过）
+- 用户设置头像公开可见
+
 ### 导入老的聊天记录
 
 **当前仅支持超级群导入。**
