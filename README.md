@@ -35,11 +35,10 @@
 你需要：
 
 - 一个 Bot 帐号，事先获取它的 token
-- 一个公网可及的 https 服务器（当然 http 的也凑合用，只是不能开 webhook 了）
+- 一个公网可及的 https 服务器，如果不用 WebHook 的话 http 也行
 - 一个**超级群**，目前只支持超级群
 - 一个 MeiliSearch 实例，配不配置 key 都行
-- 一个 Redis 实例，没有也行
-- 一个 Docker 环境
+- 一个 Redis 实例，没有也行，就是可能异常重启会丢消息
 
 ### 配置
 
@@ -49,11 +48,31 @@
 
 ### 运行
 
+#### With Docker
+
 ```bash
 docker run -d --restart=always --env-file=.env quay.io/oott123/telegram-archive-server
 ```
 
 当然，也可以使用 Kubernetes 或者 docker-compose 运行。
+
+#### Using Source Code
+
+如果没有 Docker 或者不想用 Docker，也可以从源码编译部署。此时你还需要：
+
+- git
+- node 14
+
+```bash
+git clone https://github.com/oott123/telegram-archive-server.git
+cd telegram-archive-server
+# git checkout vX.X.X
+cp .env.example .env
+vim .env
+yarn
+yarn build
+yarn start
+```
 
 ### 使用
 
@@ -67,6 +86,16 @@ docker run -d --restart=always --env-file=.env quay.io/oott123/telegram-archive-
 
 - 曾与 Bot 交互过（发送过消息，或是授权登录过）
 - 用户设置头像公开可见
+
+#### 新记录的索引规则
+
+由于 MeiliSearch 对新消息的索引效率较差，只有在满足如下任意条件时，消息才会进入索引：
+
+- 60 秒内没有收到新消息
+- 累计收到了 100 条没有进入索引的消息
+- 主进程接收到 SIGINT 信号
+
+如果没有使用 redis 以持久化消息队列，在程序异常、服务器重启时可能会丢失未进入队列的消息。
 
 ### 导入老的聊天记录
 
