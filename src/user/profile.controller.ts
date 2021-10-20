@@ -29,7 +29,7 @@ export class ProfileController {
 
     const photo = await this.botService.getProfilePhoto(Number(userId))
     const buf = photo ? await photo.buffer() : Buffer.from([])
-    this.cache.set(cacheKey, buf).catch(console.error)
+    this.cache.set(cacheKey, buf, { ttl: 3600 }).catch(console.error)
     return buf
   }
 }

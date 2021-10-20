@@ -9,5 +9,5 @@ export default registerAs('cache', () => ({
     db: Number(process.env.CACHE_REDIS_DB || 0),
     keyPrefix: process.env.CACHE_REDIS_KEY_PREFIX || '',
   },
-  ttl: 0,
+  ttl: 3600,
 }))
