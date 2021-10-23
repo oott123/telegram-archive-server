@@ -144,6 +144,7 @@ export class BotService {
                 login_url: {
                   url: authUrl.toString(),
                   request_write_access: true,
+                  forward_text: `搜索「${chat.title}」`,
                 },
               },
             ],
