@@ -117,7 +117,7 @@ curl \
 
 ### OCR 识别文字(TBD)
 
-如果启用 OCR 队列，识别和入库可以在不同的实例上完成。
+如果启用 OCR 队列，那么你需要部署一个 RabbitMQ 实例，并配置第三方识别服务。识别流程如下：
 
 ```mermaid
 sequenceDiagram
@@ -130,9 +130,31 @@ sequenceDiagram
   Bot实例->>-MeiliSearch: 入库
 ```
 
-图片下载和文本入库将在 Bot 实例上完成，OCR 实例仅需访问 OCR 服务即可。
+识别和入库可以在不同的角色实例上完成：图 0 片下载和文本入库将在 Bot 实例上完成，OCR 实例仅需访问 OCR 服务即可。
 
 这样的设计使得维护者可以设计离线式的集中识别（例如使用抢占式实例运行识别服务，队列清空后关机），降低识别成本。
+
+如果你使用的是第三方云服务，可以直接关闭 OCR 队列，或是在同一个实例中开启 Bot 和 OCR 角色。
+
+#### 识别服务
+
+##### Google Cloud Visor
+
+参考 [Google Cloud Visor 文本识别文档](https://cloud.google.com/vision/docs/ocr)和 [Google Cloud Visor 计费规则](https://cloud.google.com/vision/pricing)。配置如下：
+
+```bash
+OCR_DRIVER=google
+OCR_ENDPOINT=eu-vision.googleapis.com # 或者 us-vision.googleapis.com ，决定 Google 在何处存储处理数据
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/google/credentials.json # 从 GCP 后台下载的 json 鉴权文件
+```
+
+#### 启动不同角色
+
+```bash
+docker run [...] dist/main ocr,bot
+# or
+node dist/main ocr,bot
+```
 
 ## 开发
 

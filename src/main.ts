@@ -21,6 +21,9 @@ process.on('unhandledRejection', (reason) => {
 async function bootstrap() {
   debug('bootstrapping app')
 
+  const [role] = process.argv.slice(2)
+  const roles = role ? role.split(',') : ['bot', 'ocr']
+
   debug('creating app')
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
@@ -39,20 +42,24 @@ async function bootstrap() {
   const httpCfg = app.get<ConfigType<typeof httpConfig>>(httpConfig.KEY)
   app.setGlobalPrefix(httpCfg.globalPrefix)
 
-  debug('creating bot')
-  const bot = app.get(BotService)
-  await bot.start()
+  if (roles.includes('bot')) {
+    debug('creating bot')
+    const bot = app.get(BotService)
+    await bot.start()
 
-  debug('migrating search')
-  const search = app.get(MeiliSearchService)
-  await search.migrate()
-  await search.recoverFromCache()
+    debug('migrating search')
+    const search = app.get(MeiliSearchService)
+    await search.migrate()
+    await search.recoverFromCache()
+  }
 
   debug('enable shutdown hooks')
   app.enableShutdownHooks()
 
-  debug('starting http')
-  await app.listen(httpCfg.port, httpCfg.host)
+  if (roles.includes('bot')) {
+    debug('starting http')
+    await app.listen(httpCfg.port, httpCfg.host)
+  }
 }
 
 bootstrap().catch((err) => {
