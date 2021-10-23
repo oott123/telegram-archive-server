@@ -13,8 +13,8 @@ import httpConfig from './config/http.config'
 import authConfig from './config/auth.config'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
-import { OcrModule } from './ocr/ocr.module';
-import { QueueModule } from './queue/queue.module';
+import { OCRModule } from './ocr/ocr.module'
+import { QueueModule } from './queue/queue.module'
 import cacheConfig from './config/cache.config'
 import redisStore = require('cache-manager-ioredis')
 
@@ -49,7 +49,7 @@ import redisStore = require('cache-manager-ioredis')
     BotModule,
     UserModule,
     TokenModule,
-    OcrModule,
+    OCRModule,
     QueueModule,
   ],
   controllers: [AppController],
