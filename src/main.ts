@@ -62,24 +62,6 @@ async function bootstrap() {
 
     debug('start async index handler')
     await index.startHandleAsyncMessage()
-
-    process.on('SIGUSR2', () => {
-      // eslint-disable-next-line @typescript-eslint/no-extra-semi
-      ;(async () => {
-        logger.log(
-          'SIGUSR received, flushing queued message into MeiliSearch ...',
-        )
-        await index.importAllQueued()
-      })().then(
-        () => {
-          logger.log('Flushed queued message into MeiliSearch.')
-        },
-        (err) => {
-          logger.error(err)
-          console.error(err)
-        },
-      )
-    })
   }
 
   if (roles.includes('ocr')) {
