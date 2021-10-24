@@ -129,9 +129,9 @@ curl \
 
 #### 识别服务
 
-##### Google Cloud Visor
+##### Google Cloud Vision
 
-参考 [Google Cloud Visor 文本识别文档](https://cloud.google.com/vision/docs/ocr)和 [Google Cloud Visor 计费规则](https://cloud.google.com/vision/pricing)。配置如下：
+参考 [Google Cloud Vision 文本识别文档](https://cloud.google.com/vision/docs/ocr) 和 [Google Cloud Vision 计费规则](https://cloud.google.com/vision/pricing)。配置如下：
 
 ```bash
 OCR_DRIVER=google
