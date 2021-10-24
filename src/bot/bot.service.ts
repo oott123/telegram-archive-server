@@ -121,18 +121,16 @@ export class BotService {
       timestamp: msg.date * 1000,
     }
 
+    if (searchable) {
+      await this.index.queueMessage({
+        ...baseMessage,
+        text: searchable,
+      })
+    }
+
     if (msg?.photo?.length) {
       await this.handlePhoto(msg.photo, baseMessage)
     }
-
-    if (!searchable) {
-      return
-    }
-
-    await this.index.queueMessage({
-      ...baseMessage,
-      text: searchable,
-    })
   }
 
   private async handlePhoto(
