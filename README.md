@@ -117,20 +117,11 @@ curl \
 
 ### OCR 识别文字(TBD)
 
-如果启用 OCR 队列，那么你需要部署一个 RabbitMQ 实例，并配置第三方识别服务。识别流程如下：
+如果启用 OCR 队列，那么 Redis 是必须的（可以和缓存共用一个实例），并配置第三方识别服务。识别流程如下：
 
-```mermaid
-sequenceDiagram
-  autonumber
-  Bot实例->>+OCR实例: 通过 OCR 队列发送图片
-  OCR实例->>+OCR服务: 识别图片
-  OCR服务->>-OCR实例: 返回结果
-  OCR实例->>-Bot实例: 通过入库队列发送识别结果
-  activate Bot实例
-  Bot实例->>-MeiliSearch: 入库
-```
+[![](https://mermaid.ink/img/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG4gIGF1dG9udW1iZXJcbiAgQm905a6e5L6LLT4-K09DUuWunuS-izog6YCa6L-HIE9DUiDpmJ_liJflj5HpgIHlm77niYdcbiAgT0NS5a6e5L6LLT4-K09DUuacjeWKoTog6K-G5Yir5Zu-54mHXG4gIE9DUuacjeWKoS0-Pi1PQ1Llrp7kvos6IOi_lOWbnue7k-aenFxuICBPQ1Llrp7kvostPj4tQm905a6e5L6LOiDpgJrov4flhaXlupPpmJ_liJflj5HpgIHor4bliKvnu5PmnpxcbiAgYWN0aXZhdGUgQm905a6e5L6LXG4gIEJvdOWunuS-iy0-Pi1NZWlsaVNlYXJjaDog5YWl5bqTIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjp0cnVlLCJhdXRvU3luYyI6dHJ1ZSwidXBkYXRlRGlhZ3JhbSI6dHJ1ZX0)](https://mermaid.live/edit/#eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG4gIGF1dG9udW1iZXJcbiAgQm905a6e5L6LLT4-K09DUuWunuS-izog6YCa6L-HIE9DUiDpmJ_liJflj5HpgIHlm77niYdcbiAgT0NS5a6e5L6LLT4-K09DUuacjeWKoTog6K-G5Yir5Zu-54mHXG4gIE9DUuacjeWKoS0-Pi1PQ1Llrp7kvos6IOi_lOWbnue7k-aenFxuICBPQ1Llrp7kvostPj4tQm905a6e5L6LOiDpgJrov4flhaXlupPpmJ_liJflj5HpgIHor4bliKvnu5PmnpxcbiAgYWN0aXZhdGUgQm905a6e5L6LXG4gIEJvdOWunuS-iy0-Pi1NZWlsaVNlYXJjaDog5YWl5bqTIiwibWVybWFpZCI6IntcbiAgXCJ0aGVtZVwiOiBcImRlZmF1bHRcIlxufSIsInVwZGF0ZUVkaXRvciI6dHJ1ZSwiYXV0b1N5bmMiOnRydWUsInVwZGF0ZURpYWdyYW0iOnRydWV9)
 
-识别和入库可以在不同的角色实例上完成：图 0 片下载和文本入库将在 Bot 实例上完成，OCR 实例仅需访问 OCR 服务即可。
+识别和入库可以在不同的角色实例上完成：图片下载和文本入库将在 Bot 实例上完成，OCR 实例仅需访问 OCR 服务即可。
 
 这样的设计使得维护者可以设计离线式的集中识别（例如使用抢占式实例运行识别服务，队列清空后关机），降低识别成本。
 
