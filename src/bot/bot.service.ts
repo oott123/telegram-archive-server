@@ -8,6 +8,7 @@ import { PhotoSize, Update } from '@grammyjs/types'
 import Debug = require('debug')
 import fetch from 'node-fetch'
 import createHttpsProxyAgent = require('https-proxy-agent')
+import { IndexService } from 'src/search/index.service'
 
 const debug = Debug('app:bot:bot.service')
 
@@ -19,12 +20,13 @@ export class BotService {
   private updateToken: string
   private agent: any
 
-  constructor(
+  public constructor(
     @Inject(botConfig.KEY)
     botCfg: ConfigType<typeof botConfig>,
     @Inject(httpConfig.KEY)
     httpCfg: ConfigType<typeof httpConfig>,
     private search: MeiliSearchService,
+    private index: IndexService,
   ) {
     this.useWebhook = botCfg.webhook
     this.baseUrl = `${httpCfg.baseUrl}${httpCfg.globalPrefix}`
@@ -55,7 +57,7 @@ export class BotService {
     this.bot.command('search', this.botOnSearchCommand)
   }
 
-  async start() {
+  public async start() {
     if (this.useWebhook) {
       await this.bot.init()
       return this.setWebhookUrl()
@@ -105,7 +107,7 @@ export class BotService {
       return
     }
 
-    await this.search.queueMessage({
+    await this.index.queueMessage({
       id: `${chatId}__${msg.message_id}`,
       messageId: msg.message_id,
       chatId,

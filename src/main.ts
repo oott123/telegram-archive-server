@@ -9,6 +9,7 @@ import Debug from 'debug'
 import httpConfig from './config/http.config'
 import { ConfigType } from '@nestjs/config'
 import { BotService } from './bot/bot.service'
+import { IndexService } from './search/index.service'
 
 const debug = Debug('app:main')
 
@@ -50,7 +51,10 @@ async function bootstrap() {
     debug('migrating search')
     const search = app.get(MeiliSearchService)
     await search.migrate()
-    await search.recoverFromCache()
+
+    debug('recovering index')
+    const index = app.get(IndexService)
+    await index.recoverFromCache()
   }
 
   debug('enable shutdown hooks')

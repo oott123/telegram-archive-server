@@ -8,6 +8,8 @@ import { QueueService } from './queue.service'
 
 @Module({
   providers: [
+    BullQueueService,
+    MemoryQueueService,
     {
       provide: QueueService,
       useFactory: (

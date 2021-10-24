@@ -10,7 +10,7 @@ import { BotService } from './bot.service'
 
 @Controller('bot/webhook')
 export class WebhookController {
-  constructor(private botService: BotService) {}
+  public constructor(private botService: BotService) {}
 
   @Post(':updateToken/update')
   public async update(

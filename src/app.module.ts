@@ -17,6 +17,8 @@ import { OCRModule } from './ocr/ocr.module'
 import { QueueModule } from './queue/queue.module'
 import cacheConfig from './config/cache.config'
 import redisStore = require('cache-manager-ioredis')
+import ocrConfig from './config/ocr.config'
+import queueConfig from './config/queue.config'
 
 @Module({
   imports: [
@@ -25,7 +27,15 @@ import redisStore = require('cache-manager-ioredis')
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [meilisearchConfig, botConfig, httpConfig, authConfig, cacheConfig],
+      load: [
+        meilisearchConfig,
+        botConfig,
+        httpConfig,
+        authConfig,
+        cacheConfig,
+        ocrConfig,
+        queueConfig,
+      ],
     }),
     CacheModule.registerAsync({
       isGlobal: true,
