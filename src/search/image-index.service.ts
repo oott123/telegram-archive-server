@@ -36,13 +36,17 @@ export class ImageIndexService {
       return
     }
     const textList = [message.text]
+    const ocrRaw: any[] = []
     for (const image of images) {
       if (image.type !== 'base64') {
         throw new Error('TODO')
       }
       const buf = Buffer.from(image.data, 'base64')
       debug(`getting image buffer, size ${buf.length}`, buf)
+
       const ocrResult = await this.ocr.recognize(buf)
+      ocrRaw.push(ocrResult)
+
       const text = ocrResult.map((x) => x.text).join('\n')
       textList.push(text)
     }
@@ -50,6 +54,7 @@ export class ImageIndexService {
       message: {
         ...message,
         text: textList.filter((x) => x).join('\n'),
+        ocr: ocrRaw,
       },
     })
   }

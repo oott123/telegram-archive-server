@@ -1,9 +1,4 @@
-import {
-  CACHE_MANAGER,
-  Inject,
-  Injectable,
-  OnModuleDestroy,
-} from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import meilisearchConfig from '../config/meilisearch.config'
 import { Index, MeiliSearch, Settings } from 'meilisearch'
@@ -23,6 +18,7 @@ export type MessageIndex = {
   raw: any
   from: 'import' | 'bot'
   timestamp: number
+  ocr?: any
 }
 
 export type OptionalTextMessageIndex = Omit<MessageIndex, 'text'> & {
