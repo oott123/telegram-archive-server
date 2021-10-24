@@ -27,6 +27,7 @@ import queueConfig from './config/queue.config'
     }),
     ConfigModule.forRoot({
       isGlobal: true,
+      expandVariables: true,
       load: [
         meilisearchConfig,
         botConfig,

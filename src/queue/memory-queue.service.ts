@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { Job } from 'bull'
 import {
   OCRMeta,
   MessageMeta,

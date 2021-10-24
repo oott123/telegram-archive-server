@@ -1,8 +1,16 @@
-import type { MessageIndex } from '../search/meili-search.service'
+import type {
+  MessageIndex,
+  OptionalTextMessageIndex,
+} from '../search/meili-search.service'
+
+export type Image = {
+  type: 'url' | 'base64'
+  data: string
+}
 
 export type OCRMeta = {
-  image: Buffer
-  message: Omit<MessageIndex, 'text'>
+  images: Image[]
+  message: OptionalTextMessageIndex
 }
 
 export type MessageMeta = {

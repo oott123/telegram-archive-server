@@ -1,11 +1,17 @@
-import { OCRDriverInterface, OCRResponse } from './ocr-driver.interface'
+import { OCRService, OCRResponse } from './ocr.service'
 import { ImageAnnotatorClient } from '@google-cloud/vision'
+import { Inject, Injectable } from '@nestjs/common'
+import ocrConfig from 'src/config/ocr.config'
+import { ConfigType } from '@nestjs/config'
 
-export class GoogleOCRDriver implements OCRDriverInterface {
+@Injectable()
+export class GoogleOCRService implements OCRService {
   private client!: ImageAnnotatorClient
 
-  async config(endpoint: string): Promise<void> {
-    this.client = new ImageAnnotatorClient({ apiEndpoint: endpoint })
+  public constructor(
+    @Inject(ocrConfig.KEY) ocrCfg: ConfigType<typeof ocrConfig>,
+  ) {
+    this.client = new ImageAnnotatorClient({ apiEndpoint: ocrCfg.endpoint })
   }
 
   public async recognize(image: Uint8Array): Promise<OCRResponse> {

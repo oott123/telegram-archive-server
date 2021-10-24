@@ -7,6 +7,6 @@ export default registerAs('queue', () => ({
     port: Number(process.env.QUEUE_REDIS_PORT || 6379),
     password: process.env.QUEUE_REDIS_PASSWORD,
     db: Number(process.env.QUEUE_REDIS_DB || 0),
-    keyPrefix: process.env.QUEUE_REDIS_KEY_PREFIX || '',
   },
+  keyPrefix: process.env.QUEUE_REDIS_KEY_PREFIX || '',
 }))

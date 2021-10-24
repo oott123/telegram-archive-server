@@ -1,12 +1,16 @@
-import { GoogleOCRDriver } from './google-ocr.driver'
+import { GoogleOCRService } from './google-ocr.service'
 import { readFile } from 'fs/promises'
 
-let googleOcr: GoogleOCRDriver
+let googleOcr: GoogleOCRService
 let image: Buffer
 
 beforeEach(async () => {
-  googleOcr = new GoogleOCRDriver()
-  await googleOcr.config('eu-vision.googleapis.com')
+  googleOcr = new GoogleOCRService({
+    enable: true,
+    driver: 'google',
+    endpoint: 'eu-vision.googleapis.com',
+    credentials: '',
+  })
   image = await readFile('docs/assets/search-ui.jpg')
 })
 

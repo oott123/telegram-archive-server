@@ -7,6 +7,8 @@ import {
 import { MeiliSearchService, MessageIndex } from './meili-search.service'
 import Debug from 'debug'
 import { Cache } from 'cache-manager'
+import { QueueProcessor } from 'src/queue/meta.types'
+import { QueueService } from 'src/queue/queue.service'
 
 const debug = Debug('app:search:index')
 
@@ -22,6 +24,7 @@ export class IndexService implements OnModuleDestroy {
   public constructor(
     @Inject(CACHE_MANAGER) private cache: Cache,
     private search: MeiliSearchService,
+    private asyncQueue: QueueService,
   ) {
     this.messagesQueue = []
   }
@@ -81,5 +84,15 @@ export class IndexService implements OnModuleDestroy {
     debug('app exiting, writing queue to cache')
     // await this.writeToCache()
     await this.importAllQueued()
+  }
+
+  public async startHandleAsyncMessage() {
+    await this.asyncQueue.process('message', this.handleAsyncMessage)
+  }
+
+  private handleAsyncMessage: QueueProcessor<'message'> = async ({
+    message,
+  }) => {
+    this.queueMessage(message)
   }
 }

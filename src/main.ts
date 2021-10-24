@@ -10,6 +10,7 @@ import httpConfig from './config/http.config'
 import { ConfigType } from '@nestjs/config'
 import { BotService } from './bot/bot.service'
 import { IndexService } from './search/index.service'
+import { ImageIndexService } from './search/image-index.service'
 
 const debug = Debug('app:main')
 
@@ -55,6 +56,15 @@ async function bootstrap() {
     debug('recovering index')
     const index = app.get(IndexService)
     await index.recoverFromCache()
+
+    debug('start async index handler')
+    await index.startHandleAsyncMessage()
+  }
+
+  if (roles.includes('ocr')) {
+    debug('start ocr handler')
+    const imageIndex = app.get(ImageIndexService)
+    await imageIndex.startHandleOCR()
   }
 
   debug('enable shutdown hooks')

@@ -2,13 +2,14 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { Bot, Context, GrammyError, NextFunction } from 'grammy'
 import botConfig from '../config/bot.config'
-import { MeiliSearchService } from '../search/meili-search.service'
+import { OptionalTextMessageIndex } from '../search/meili-search.service'
 import httpConfig from '../config/http.config'
 import { PhotoSize, Update } from '@grammyjs/types'
 import Debug = require('debug')
 import fetch from 'node-fetch'
 import createHttpsProxyAgent = require('https-proxy-agent')
 import { IndexService } from 'src/search/index.service'
+import { ImageIndexService } from 'src/search/image-index.service'
 
 const debug = Debug('app:bot:bot.service')
 
@@ -25,8 +26,8 @@ export class BotService {
     botCfg: ConfigType<typeof botConfig>,
     @Inject(httpConfig.KEY)
     httpCfg: ConfigType<typeof httpConfig>,
-    private search: MeiliSearchService,
     private index: IndexService,
+    private imageIndex: ImageIndexService,
   ) {
     this.useWebhook = botCfg.webhook
     this.baseUrl = `${httpCfg.baseUrl}${httpCfg.globalPrefix}`
@@ -86,6 +87,10 @@ export class BotService {
     }
 
     const { file_id: fileId } = getSmallestPhoto(photos[0])
+    return await this.fetchFile(fileId)
+  }
+
+  private async fetchFile(fileId: string) {
     const { file_path: filePath } = await this.bot.api.getFile(fileId)
     const fileUrl = `https://api.telegram.org/file/bot${this.bot.token}/${filePath}`
 
@@ -103,11 +108,8 @@ export class BotService {
     const realId = `${chat.id}`.replace(/^-100/, '')
     const chatId = `${chat.type}${realId}`
     const searchable = msg?.text || msg?.caption
-    if (!searchable) {
-      return
-    }
 
-    await this.index.queueMessage({
+    const baseMessage: OptionalTextMessageIndex = {
       id: `${chatId}__${msg.message_id}`,
       messageId: msg.message_id,
       chatId,
@@ -117,7 +119,30 @@ export class BotService {
       raw: ctx.msg,
       from: 'bot',
       timestamp: msg.date * 1000,
+    }
+
+    if (msg?.photo?.length) {
+      await this.handlePhoto(msg.photo, baseMessage)
+    }
+
+    if (!searchable) {
+      return
+    }
+
+    await this.index.queueMessage({
+      ...baseMessage,
+      text: searchable,
     })
+  }
+
+  private async handlePhoto(
+    photoSize: PhotoSize[],
+    baseMessage: OptionalTextMessageIndex,
+  ) {
+    const { file_id: fileId } = getLargestPhoto(photoSize)
+    const res = await this.fetchFile(fileId)
+    const buf = await res.buffer()
+    await this.imageIndex.indexImage([buf], baseMessage)
   }
 
   private botOnSearchCommand = async (ctx: Context) => {
@@ -216,5 +241,10 @@ function getProxyAgent() {
 
 function getSmallestPhoto(photos: PhotoSize[]): PhotoSize {
   const sorted = photos.sort((a, b) => a.width - b.width)
+  return sorted[0]
+}
+
+function getLargestPhoto(photos: PhotoSize[]): PhotoSize {
+  const sorted = photos.sort((a, b) => b.width - a.width)
   return sorted[0]
 }

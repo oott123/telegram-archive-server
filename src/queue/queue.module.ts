@@ -8,22 +8,21 @@ import { QueueService } from './queue.service'
 
 @Module({
   providers: [
-    BullQueueService,
-    MemoryQueueService,
     {
       provide: QueueService,
-      useFactory: (
+      useFactory: async (
         moduleRef: ModuleRef,
         queueCfg: ConfigType<typeof queueConfig>,
       ) => {
         if (queueCfg.enable) {
-          return moduleRef.get(BullQueueService)
+          return await moduleRef.create(BullQueueService)
         } else {
-          return moduleRef.get(MemoryQueueService)
+          return await moduleRef.create(MemoryQueueService)
         }
       },
       inject: [ModuleRef, queueConfig.KEY],
     },
   ],
+  exports: [QueueService],
 })
 export class QueueModule {}

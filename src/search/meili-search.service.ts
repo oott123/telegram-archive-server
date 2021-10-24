@@ -25,8 +25,12 @@ export type MessageIndex = {
   timestamp: number
 }
 
+export type OptionalTextMessageIndex = Omit<MessageIndex, 'text'> & {
+  text: string | undefined
+}
+
 @Injectable()
-export class MeiliSearchService implements OnModuleDestroy {
+export class MeiliSearchService {
   private client: MeiliSearch
   private indexPrefix: string
   private messagesIndex: Index<MessageIndex>
@@ -40,10 +44,6 @@ export class MeiliSearchService implements OnModuleDestroy {
     this.messagesIndex = this.client.index<MessageIndex>(
       `${this.indexPrefix}messages`,
     )
-  }
-
-  public onModuleDestroy() {
-    throw new Error('Method not implemented.')
   }
 
   public async migrate(): Promise<void> {
