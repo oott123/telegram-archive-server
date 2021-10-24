@@ -11,6 +11,7 @@ import { ConfigType } from '@nestjs/config'
 import { BotService } from './bot/bot.service'
 import { IndexService } from './search/index.service'
 import { ImageIndexService } from './search/image-index.service'
+import { Logger } from '@nestjs/common'
 
 const debug = Debug('app:main')
 
@@ -23,8 +24,10 @@ process.on('unhandledRejection', (reason) => {
 async function bootstrap() {
   debug('bootstrapping app')
 
+  const logger = new Logger('bootstrap')
   const [role] = process.argv.slice(2)
   const roles = role ? role.split(',') : ['bot', 'ocr']
+  logger.log(`Starting roles ${roles.join(', ')}`)
 
   debug('creating app')
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -59,6 +62,24 @@ async function bootstrap() {
 
     debug('start async index handler')
     await index.startHandleAsyncMessage()
+
+    process.on('SIGUSR2', () => {
+      // eslint-disable-next-line @typescript-eslint/no-extra-semi
+      ;(async () => {
+        logger.log(
+          'SIGUSR received, flushing queued message into MeiliSearch ...',
+        )
+        await index.importAllQueued()
+      })().then(
+        () => {
+          logger.log('Flushed queued message into MeiliSearch.')
+        },
+        (err) => {
+          logger.error(err)
+          console.error(err)
+        },
+      )
+    })
   }
 
   if (roles.includes('ocr')) {
@@ -74,6 +95,8 @@ async function bootstrap() {
     debug('starting http')
     await app.listen(httpCfg.port, httpCfg.host)
   }
+
+  logger.log('App bootstrap finished')
 }
 
 bootstrap().catch((err) => {
