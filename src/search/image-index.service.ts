@@ -50,10 +50,17 @@ export class ImageIndexService {
       const text = ocrResult.map((x) => x.text).join('\n')
       textList.push(text)
     }
+    const searchable = textList
+      .filter((x) => x)
+      .join('\n')
+      .trim()
+    if (!searchable) {
+      return
+    }
     await this.queue.add('message', {
       message: {
         ...message,
-        text: textList.filter((x) => x).join('\n'),
+        text: searchable,
         ocr: ocrRaw,
       },
     })
