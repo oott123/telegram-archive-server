@@ -4,6 +4,7 @@ import { ModuleRef } from '@nestjs/core'
 import ocrConfig from 'src/config/ocr.config'
 import { GoogleOCRService } from './google-ocr.service'
 import { OCRService } from './ocr.service'
+import { PaddleOCRWebService } from './paddle-ocr-web.service'
 
 @Module({
   providers: [
@@ -18,6 +19,8 @@ import { OCRService } from './ocr.service'
         }
         if (ocrCfg.driver === 'google') {
           return moduleRef.create(GoogleOCRService)
+        } else if (ocrCfg.driver === 'paddle-ocr-web') {
+          return moduleRef.create(PaddleOCRWebService)
         }
 
         try {

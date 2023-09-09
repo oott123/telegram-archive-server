@@ -62,7 +62,7 @@ export class IndexService implements OnModuleDestroy {
   }
 
   public queueMessage(message: MessageIndex) {
-    debug('adding message to queue')
+    debug('adding message to queue', message)
     this.messagesQueue.push(message)
 
     this.writeToCache().catch(console.error)

@@ -66,7 +66,7 @@ docker run -d --restart=always --env-file=.env quay.io/oott123/telegram-archive-
 如果没有 Docker 或者不想用 Docker，也可以从源码编译部署。此时你还需要：
 
 - git
-- node 14
+- node 18
 
 ```bash
 git clone https://github.com/oott123/telegram-archive-server.git
@@ -142,6 +142,15 @@ curl \
 OCR_DRIVER=google
 OCR_ENDPOINT=eu-vision.googleapis.com # 或者 us-vision.googleapis.com ，决定 Google 在何处存储处理数据
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/google/credentials.json # 从 GCP 后台下载的 json 鉴权文件
+```
+
+##### PaddleOCR
+
+你需要一个 [paddleocr-web](https://github.com/lilydjwg/paddleocr-web) 实例。配置如下：
+
+```bash
+OCR_DRIVER=paddle-ocr-web
+OCR_ENDPOINT=http://127.0.0.1:8980/api
 ```
 
 #### 启动不同角色
