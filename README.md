@@ -114,11 +114,11 @@ yarn start
 curl \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $AUTH_IMPORT_TOKEN" \
-  --data @result.json \
+  -T result.json \
   http://localhost:3100/api/v1/import/fromTelegramGroupExport
 ```
 
-即可导入记录。注意只能导入单个群的记录。
+即可导入记录。注意一次只能导入单个群的记录。
 
 ### OCR 识别文字(TBD)
 
