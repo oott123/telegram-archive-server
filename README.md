@@ -114,7 +114,7 @@ yarn start
 curl \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $AUTH_IMPORT_TOKEN" \
-  -T result.json \
+  -XPOST -T result.json \
   http://localhost:3100/api/v1/import/fromTelegramGroupExport
 ```
 
