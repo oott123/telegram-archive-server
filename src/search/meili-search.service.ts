@@ -64,9 +64,16 @@ export class MeiliSearchService {
     ]
 
     try {
-      await this.client.getIndex(this.messagesIndex.uid)
+      const index = await this.client.getIndex(this.messagesIndex.uid)
+      if (index.primaryKey == null) {
+        await this.client.updateIndex(this.messagesIndex.uid, {
+          primaryKey: 'id',
+        })
+      }
     } catch (e) {
-      await this.client.createIndex(this.messagesIndex.uid)
+      await this.client.createIndex(this.messagesIndex.uid, {
+        primaryKey: 'id',
+      })
     }
     await this.messagesIndex.fetchInfo()
 
@@ -85,6 +92,7 @@ export class MeiliSearchService {
   }
 
   public async importMessages(messages: MessageIndex[]): Promise<void> {
+    console.log(messages)
     await this.messagesIndex.addDocuments(messages)
   }
 
