@@ -182,7 +182,7 @@
           instantsearch.widgets.stats({
             container: '#stats',
             templates: {
-              text: `找到 {{#helpers.formatNumber}}{{nbHits}}{{/helpers.formatNumber}} 条结果，用时 {{processingTimeMS}} 毫秒。`,
+              text: `找到 {{#helpers.formatNumber}}{{estimatedTotalHits}}{{/helpers.formatNumber}} 条结果，用时 {{processingTimeMS}} 毫秒。`,
             },
           }),
         ])
