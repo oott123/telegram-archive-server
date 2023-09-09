@@ -63,7 +63,11 @@ export class MeiliSearchService {
       'timestamp:desc',
     ]
 
-    await this.client.getOrCreateIndex(this.messagesIndex.uid)
+    try {
+      await this.client.getIndex(this.messagesIndex.uid)
+    } catch (e) {
+      await this.client.createIndex(this.messagesIndex.uid)
+    }
     await this.messagesIndex.fetchInfo()
 
     const currentSettings = await this.messagesIndex.getSettings()
