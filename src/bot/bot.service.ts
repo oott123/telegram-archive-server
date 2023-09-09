@@ -56,6 +56,7 @@ export class BotService {
     }
 
     this.bot.command('search', this.botOnSearchCommand)
+    this.bot.command('flush', this.botOnFlushCommand)
   }
 
   public async start() {
@@ -141,6 +142,18 @@ export class BotService {
     const res = await this.fetchFile(fileId)
     const buf = await res.buffer()
     await this.imageIndex.indexImage([buf], baseMessage)
+  }
+
+  private botOnFlushCommand = async (ctx: Context) => {
+    const { chat } = ctx
+
+    if (chat?.type === 'private') {
+      await ctx.reply('？')
+      return
+    }
+
+    await this.index.importAllQueued()
+    await ctx.reply('🧽')
   }
 
   private botOnSearchCommand = async (ctx: Context) => {
