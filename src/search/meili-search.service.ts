@@ -92,7 +92,6 @@ export class MeiliSearchService {
   }
 
   public async importMessages(messages: MessageIndex[]): Promise<void> {
-    console.log(messages)
     await this.messagesIndex.addDocuments(messages)
   }
 
