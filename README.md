@@ -36,7 +36,7 @@
 你需要：
 
 - 一个 Bot 帐号，事先获取它的 token
-- 一个公网可及的 https 服务器，如果不用 WebHook 的话 http 也行
+- 一个公网可及的 https 服务器，一定要有 https
 - 一个**超级群**，目前只支持超级群
 - 一个 MeiliSearch 实例，配不配置 key 都行
 - 一个 Redis 实例，没有也行，就是可能异常重启会丢消息
@@ -48,6 +48,10 @@
 你可以将它保存为 `.env` ，或是作为环境变量配置。
 
 ### 运行
+
+#### HTTPS
+
+TAS 并不提供内建的 https 服务，建议使用 Caddy 或类似软件反向代理 TAS。
 
 #### With Docker
 
