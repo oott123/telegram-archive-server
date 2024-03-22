@@ -153,6 +153,16 @@ OCR_DRIVER=paddle-ocr-web
 OCR_ENDPOINT=http://127.0.0.1:8980/api
 ```
 
+##### Azure OCR
+
+创建一个 [Azure Vision](https://portal.azure.com/#create/Microsoft.CognitiveServicesComputerVision) 资源，并将资源信息配置如下：
+
+```bash
+OCR_DRIVER=azure
+OCR_ENDPOINT=https://tas.cognitiveservices.azure.com
+OCR_CREDENTIALS=000000000000000000000000000000000
+```
+
 #### 启动不同角色
 
 ```bash
