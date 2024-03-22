@@ -1,7 +1,7 @@
 import { OCRService, OCRResponse } from './ocr.service'
 import { ImageAnnotatorClient } from '@google-cloud/vision'
 import { Inject, Injectable } from '@nestjs/common'
-import ocrConfig from 'src/config/ocr.config'
+import ocrConfig from '../config/ocr.config'
 import { ConfigType } from '@nestjs/config'
 
 @Injectable()
