@@ -37,19 +37,25 @@ export class ImageIndexService {
     }
     const textList = [message.text]
     const ocrRaw: any[] = []
-    for (const image of images) {
-      if (image.type !== 'base64') {
-        throw new Error('TODO')
+
+    try {
+      for (const image of images) {
+        if (image.type !== 'base64') {
+          throw new Error('TODO')
+        }
+        const buf = Buffer.from(image.data, 'base64')
+        debug(`getting image buffer, size ${buf.length}`, buf)
+
+        const ocrResult = await this.ocr.recognize(buf)
+        ocrRaw.push(ocrResult)
+
+        const text = ocrResult.map((x) => x.text).join('\n')
+        textList.push(text)
       }
-      const buf = Buffer.from(image.data, 'base64')
-      debug(`getting image buffer, size ${buf.length}`, buf)
-
-      const ocrResult = await this.ocr.recognize(buf)
-      ocrRaw.push(ocrResult)
-
-      const text = ocrResult.map((x) => x.text).join('\n')
-      textList.push(text)
+    } catch (e) {
+      debug('unable to process ocr, skipping it', e)
     }
+
     const searchable = textList
       .filter((x) => x)
       .join('\n')
