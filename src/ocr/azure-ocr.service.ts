@@ -29,6 +29,7 @@ export class AzureOCRService implements OCRService {
     const request = await this.client.readInStream(imgBuffer, {
       readingOrder: 'natural',
     })
+    debug('read request finished', request._response)
 
     const results = await (async () => {
       const totalTimes = 30
@@ -36,7 +37,9 @@ export class AzureOCRService implements OCRService {
         await new Promise((r) => setTimeout(r, 500))
 
         const result = await this.client.getReadResult(
-          request._response.parsedHeaders['apim-request-id'],
+          request._response.parsedHeaders.operationLocation?.match(
+            /[^/]+$/,
+          )![0],
         )
         if (result._response.parsedBody.status === 'running') {
           debug(`task running ${i + 1}/${totalTimes}...`)
